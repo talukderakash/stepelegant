@@ -1,0 +1,20 @@
+{% extends 'admin_base.html' %}{% block admin_content %}
+<div class="admin-top"><div><span class="eyebrow">PRODUCT EDITOR</span><h1>{{'Edit Product' if product else 'New Product'}}</h1></div><a class="inline-link" href="{{url_for('admin_products')}}">← BACK TO PRODUCTS</a></div>
+<form class="admin-card edit-form" method="post" enctype="multipart/form-data">
+<input type="hidden" name="_csrf" value="{{csrf_token()}}"><div class="fields">
+<label>Product Name *<input name="name" required maxlength="150" value="{{product.name if product else ''}}"></label>
+<label>Category *<select name="category">{% for category in ['Sneakers','Formal','Casual','Sports','Sandals','Boots'] %}<option {% if product and product.category==category %}selected{% endif %}>{{category}}</option>{% endfor %}</select></label>
+<label>Price (USD) *<input type="number" step="0.01" min="0" name="price" required value="{{product.price if product else ''}}"></label>
+<label>Compare At Price (USD)<input type="number" step="0.01" min="0" name="compare_price" value="{{product.compare_price if product and product.compare_price else ''}}"></label>
+<label>Stock Count *<input type="number" name="stock" min="0" required value="{{product.stock if product else 10}}"></label>
+<label>Available Sizes (comma-separated) *<input name="sizes" required value="{{product.sizes if product else '6,7,8,9,10,11'}}"></label>
+<label class="full">Description<textarea name="description" rows="5">{{product.description if product else ''}}</textarea></label>
+<label class="full">Product images — 1 to 5 total (JPG / PNG / WebP, max 5MB each)<input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple></label>
+<label class="full">Product videos — 0 to 2 total (MP4 / WebM, max 40MB each)<input type="file" name="videos" accept="video/mp4,video/webm" multiple></label>
+</div>
+{% if product %}<h3>Existing media — check to remove</h3><div class="media-admin-grid">
+{% if product.image and not product.media|selectattr('kind','equalto','image')|list %}<div><img src="{{product.image|media_url}}" alt="Legacy image"><small>Original product image (retained)</small></div>{% endif %}
+{% for media in product.media %}<label class="media-admin-tile">{% if media.kind=='image' %}<img src="{{media.path|media_url}}" alt="Product photo">{% else %}<video controls preload="metadata" src="{{media.path|media_url}}"></video>{% endif %}<span><input type="checkbox" name="remove_media" value="{{media.id}}"> Remove {{media.kind}}</span></label>{% endfor %}
+</div>{% endif %}
+<div class="check-line"><label><input type="checkbox" name="active" {% if not product or product.active %}checked{% endif %}> Visible on storefront</label><label><input type="checkbox" name="featured" {% if product and product.featured %}checked{% endif %}> Featured product</label></div><button class="btn dark" type="submit">SAVE PRODUCT ↗</button></form>
+{% endblock %}

@@ -1,0 +1,33 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.db
+instance/
+static/uploads/*
+!static/uploads/.gitkeep
+.DS_Store
+
+# Private configuration
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Local uploads
+static/uploads/
+uploads/
+
+# macOS
+.DS_Store

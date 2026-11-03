@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% block title %}{{product.name}}{% endblock %}{% block content %}<section class="section detail"><div class="detail-media"><div class="gallery-view" id="gallery-view">
+{% set pictures=product.media|selectattr('kind','equalto','image')|list %}
+{% if pictures or product.image %}<img src="{{(product.image or pictures[0].path)|media_url}}" alt="{{product.name}}" id="gallery-main-image">
+
+{% else %}<div class="shoe-placeholder big"><span>STEP ELEGANT</span><strong>SE.</strong><small>NEW COLLECTION</small></div>{% endif %}
+</div><div class="gallery-thumbs" aria-label="Product photos and videos">
+{% if product.image and (not pictures or product.image not in pictures|map(attribute='path')|list) %}<button type="button" class="gallery-thumb selected" data-kind="image" data-src="{{product.image|media_url}}"><img src="{{product.image|media_url}}" alt="Product photo"></button>{% endif %}
+{% for media in product.media %}<button type="button" class="gallery-thumb {% if loop.first %}selected{% endif %}" data-kind="{{media.kind}}" data-src="{{media.path|media_url}}" aria-label="View {{media.kind}} {{loop.index}}">{% if media.kind=='image' %}<img src="{{media.path|media_url}}" alt="Photo {{loop.index}}">{% else %}<span>▶ VIDEO</span>{% endif %}</button>{% endfor %}
+</div></div><div class="detail-info"><div class="breadcrumbs"><a href="{{url_for('shop')}}">SHOP</a> / {{product.category|upper}}</div><h1>{{product.name}}</h1><p class="detail-category">{{product.category|upper}} / STEP ELEGANT</p><div class="detail-prices"><b>${{'%.2f'|format(product.price)}}</b>{% if product.compare_price %}<del>${{'%.2f'|format(product.compare_price)}}</del>{% endif %}</div><p class="description">{{product.description or 'Discover your next favorite pair.'}}</p><form action="{{url_for('cart_add',product_id=product.id)}}" method="post"><input type="hidden" name="_csrf" value="{{csrf_token()}}"><label class="field-label">SELECT YOUR SIZE</label><div class="size-options">{% for size in product.sizes.split(',') %}<label><input type="radio" name="size" value="{{size.strip()}}" {% if loop.first %}checked{% endif %}><span>{{size.strip()}}</span></label>{% endfor %}</div><label class="field-label" for="qty">QUANTITY</label><input id="qty" class="qty-input" type="number" min="1" max="{{product.stock}}" value="1" name="qty" required><button class="btn dark wide" {% if product.stock==0 %}disabled{% endif %} type="submit">{% if product.stock %}ADD TO BAG ↗{% else %}SOLD OUT{% endif %}</button></form><div class="note-list"><div>✓ Secure order requests</div><div>✓ Personal customer service</div><div>✓ Stock availability displayed</div></div></div></section>{% if related %}<section class="section"><div class="section-head"><h2>YOU MAY ALSO <em>LIKE.</em></h2></div>{% set products=related %}{% include '_product_cards.html' %}</section>{% endif %}{% endblock %}
+
+{% block scripts %}<script>
+document.querySelectorAll('.gallery-thumb').forEach(button => button.addEventListener('click', () => {
+  const stage = document.getElementById('gallery-view');
+  stage.replaceChildren();
+  const element = document.createElement(button.dataset.kind === 'video' ? 'video' : 'img');
+  element.src = button.dataset.src;
+  if (button.dataset.kind === 'video') {element.controls = true; element.playsInline = true; element.preload = 'metadata';}
+  else element.alt = 'Product gallery image';
+  stage.appendChild(element);
+  document.querySelectorAll('.gallery-thumb').forEach(x => x.classList.toggle('selected',x === button));
+}));
+</script>{% endblock %}
